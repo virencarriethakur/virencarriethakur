@@ -1,0 +1,439 @@
+[
+    {
+        "id": "75337a3c61eafa54",
+        "type": "tab",
+        "label": "rss-nbcsports",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "4eff4faedeec8b27",
+        "type": "inject",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 20,
+        "wires": [
+            [
+                "260c30f67cddbddd"
+            ]
+        ]
+    },
+    {
+        "id": "260c30f67cddbddd",
+        "type": "http request",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://www.nbcsports.com/nba",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 270,
+        "y": 60,
+        "wires": [
+            [
+                "f1e99c66320430e5"
+            ]
+        ]
+    },
+    {
+        "id": "21bb2b2da1241454",
+        "type": "debug",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "f1e99c66320430e5",
+        "type": "html",
+        "z": "75337a3c61eafa54",
+        "name": "div",
+        "property": "payload",
+        "outproperty": "payload",
+        "tag": "div.more-headlines__list-item",
+        "ret": "html",
+        "as": "multi",
+        "x": 410,
+        "y": 60,
+        "wires": [
+            [
+                "86eb26243ccaeff0"
+            ]
+        ]
+    },
+    {
+        "id": "d478c28f9529b6cc",
+        "type": "comment",
+        "z": "75337a3c61eafa54",
+        "name": "splitting div's per article",
+        "info": "",
+        "x": 400,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "5c8d28bd6497eb67",
+        "type": "comment",
+        "z": "75337a3c61eafa54",
+        "name": "extracting title",
+        "info": "",
+        "x": 70,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "f5681445f3797b0d",
+        "type": "html",
+        "z": "75337a3c61eafa54",
+        "name": "title",
+        "property": "payload",
+        "outproperty": "item.title",
+        "tag": "div.story__title a",
+        "ret": "html",
+        "as": "multi",
+        "x": 70,
+        "y": 140,
+        "wires": [
+            [
+                "380e7fbd6816878a"
+            ]
+        ]
+    },
+    {
+        "id": "380e7fbd6816878a",
+        "type": "html",
+        "z": "75337a3c61eafa54",
+        "name": "link",
+        "property": "payload",
+        "outproperty": "item.link",
+        "tag": "div.story__title a",
+        "ret": "attr",
+        "as": "multi",
+        "x": 70,
+        "y": 220,
+        "wires": [
+            [
+                "4b2b249664a4c519"
+            ]
+        ]
+    },
+    {
+        "id": "e4fa69829d1ce1fe",
+        "type": "html",
+        "z": "75337a3c61eafa54",
+        "name": "description",
+        "property": "payload",
+        "outproperty": "item.description",
+        "tag": "div.story__summary",
+        "ret": "html",
+        "as": "single",
+        "x": 90,
+        "y": 280,
+        "wires": [
+            [
+                "9c4af4bac365c83a"
+            ]
+        ]
+    },
+    {
+        "id": "4b2b249664a4c519",
+        "type": "change",
+        "z": "75337a3c61eafa54",
+        "name": "date",
+        "rules": [
+            {
+                "t": "set",
+                "p": "item.date",
+                "pt": "msg",
+                "to": "$replace(\t   item.link.href,\t   /.*(\\d{4})\\/(\\d{2})\\/(\\d{2}).*/,\t   \"$1-$2-$3\" \t)\t",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 230,
+        "y": 220,
+        "wires": [
+            [
+                "e4fa69829d1ce1fe"
+            ]
+        ]
+    },
+    {
+        "id": "e16f1ad42fc684ad",
+        "type": "comment",
+        "z": "75337a3c61eafa54",
+        "name": "regular expression  error",
+        "info": "$replace(item.link.href, /.*(\\d(4))(\\d(2))(\\d(2)).*/, \"$1-$2-$3\" )\n$replace(item.link.href, /.*(\\d{4})(\\d{2})(\\d{2}).*/, \"$1/$2/$3\" )\n\n# regular expression for date \ndoes not match \nas date is not in a formate  jsonata\n$replace(item.link.href, /.*(\\d(4))(\\d(2))(\\d(4)).*/, \"$1-$2-$3\" )\nof yyyy/mm/dd but \n\"Fri, 15 Apr 2022 07:20:03 GMT\n\nJSONata\n$now()\t\n$toMillis('10/12/2018', '[D]/[M]/[Y]')\n$replace(item[0].link.href, /.*(\\d(4))(\\d(2))(\\d(2)).*/, \"$1-$2-$3\" )\n \n ",
+        "x": 320,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "f345b193c3747486",
+        "type": "join",
+        "z": "75337a3c61eafa54",
+        "name": "join",
+        "mode": "custom",
+        "build": "array",
+        "property": "item",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 430,
+        "y": 280,
+        "wires": [
+            [
+                "e3c21d3b71a80478"
+            ]
+        ]
+    },
+    {
+        "id": "86eb26243ccaeff0",
+        "type": "change",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "rules": [
+            {
+                "t": "move",
+                "p": "parts",
+                "pt": "msg",
+                "to": "_parts",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 360,
+        "y": 100,
+        "wires": [
+            [
+                "f5681445f3797b0d"
+            ]
+        ]
+    },
+    {
+        "id": "9c4af4bac365c83a",
+        "type": "change",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "rules": [
+            {
+                "t": "move",
+                "p": "_parts",
+                "pt": "msg",
+                "to": "parts",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 270,
+        "y": 280,
+        "wires": [
+            [
+                "f345b193c3747486"
+            ]
+        ]
+    },
+    {
+        "id": "6a98020344714331",
+        "type": "rss",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "feedOptionRules": [
+            {
+                "name": "title",
+                "type": "str",
+                "value": "ProBasketball Talk"
+            },
+            {
+                "name": "feed_url",
+                "type": "str",
+                "value": "localhost:1880/rss/nbcsports"
+            },
+            {
+                "name": "site_url",
+                "type": "str",
+                "value": "https://www.nbcsports.com/nba"
+            }
+        ],
+        "itemOptionRules": [
+            {
+                "name": "title",
+                "type": "item",
+                "value": "title"
+            },
+            {
+                "name": "description",
+                "type": "item",
+                "value": "description"
+            },
+            {
+                "name": "url",
+                "type": "item",
+                "value": "link.href"
+            },
+            {
+                "name": "guid",
+                "type": "item",
+                "value": "link.href"
+            },
+            {
+                "name": "date",
+                "type": "item",
+                "value": "date"
+            }
+        ],
+        "x": 250,
+        "y": 360,
+        "wires": [
+            [
+                "8ec9dd72ae85ccc5"
+            ]
+        ]
+    },
+    {
+        "id": "e3c21d3b71a80478",
+        "type": "change",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "rules": [
+            {
+                "t": "move",
+                "p": "item",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 80,
+        "y": 360,
+        "wires": [
+            [
+                "6a98020344714331"
+            ]
+        ]
+    },
+    {
+        "id": "d55423ab29c9bd2f",
+        "type": "http response",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 470,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "8ec9dd72ae85ccc5",
+        "type": "change",
+        "z": "75337a3c61eafa54",
+        "name": "header",
+        "rules": [
+            {
+                "t": "set",
+                "p": "header.Content-Type",
+                "pt": "msg",
+                "to": "application/rss+xml",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 260,
+        "y": 400,
+        "wires": [
+            [
+                "d55423ab29c9bd2f",
+                "21bb2b2da1241454"
+            ]
+        ]
+    },
+    {
+        "id": "499666ba62955482",
+        "type": "http in",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "url": "/rss/nbcsports",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 90,
+        "y": 60,
+        "wires": [
+            [
+                "260c30f67cddbddd"
+            ]
+        ]
+    },
+    {
+        "id": "1f1c4e8eb679dd61",
+        "type": "comment",
+        "z": "75337a3c61eafa54",
+        "name": "",
+        "info": "",
+        "x": 80,
+        "y": 320,
+        "wires": []
+    }
+]
